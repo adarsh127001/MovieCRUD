@@ -4,6 +4,7 @@ import com.example.moviedb.security.JwtUtil;
 import com.example.moviedb.model.User;
 import com.example.moviedb.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,9 @@ public class AuthController {
         String username = credentials.get("username");
         String password = credentials.get("password");
 
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
